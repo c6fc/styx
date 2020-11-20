@@ -84,6 +84,7 @@ exports.main = function(event, context, cb) {
 			});
 
 			var response = {
+				accountId: process.env.ACCOUNTID,
 				callerUsername: callerUsername,
 				customers: customerList
 			}

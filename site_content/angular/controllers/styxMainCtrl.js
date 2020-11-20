@@ -429,7 +429,7 @@ angular
                 credFileText += "[styx_" + $scope.cliFriendly(e.customerName.toLowerCase()) + "_" + $scope.cliFriendly(account.name.toLowerCase()) + "]\n";
                 credFileText += "role_arn = arn:aws:iam::" + account.number + ":role/" + account.roleName + "\n";
                 credFileText += "source_profile = styx\n",
-                credFileText += "mfa_serial = arn:aws:iam::" + data.account_number + ":mfa/" + data.msg.callerUsername + "\n\n";
+                credFileText += "mfa_serial = arn:aws:iam::" + data.accountId + ":mfa/" + data.msg.callerUsername + "\n\n";
               });
             });
 

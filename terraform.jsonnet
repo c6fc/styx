@@ -232,7 +232,8 @@ else "${aws_acm_certificate.main.arn}";
 		environment: {
 			variables: {
 				TABLE: "${aws_dynamodb_table.styx.id}",
-				BASEPATH: settings.root_fqdn
+				BASEPATH: settings.root_fqdn,
+				ACCOUNTID: "${data.aws_caller_identity.current.account_id}"
 			}
 		},
 
