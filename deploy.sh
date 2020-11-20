@@ -54,6 +54,28 @@ if [[ "$ERR" -eq "1" ]]; then
 	exit 1
 fi
 
+BUCKET=$(jq -r '.backendBucket' settings.json)
+
+export AWS_DEFAULT_OUTPUT=json
+export AWS_DEFAULT_REGION=$(jq -r '.defaultRegion' settings.json)
+export AWS_PROFILE=$(jq -r '.awsProfile' settings.json)
+
+EXISTS=$(aws s3api get-bucket-location --bucket $BUCKET)
+if [[ $? -ne 0 ]]; then
+	aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$AWS_DEFAULT_REGION
+
+	if [[ $? -ne 0 ]]; then
+		echo "Error creating backendBucket. Fix that^ error then try again."
+		exit 1
+	fi
+else
+	if [[ "$( echo $EXISTS | jq -r '.LocationConstraint' )" != "$AWS_DEFAULT_REGION" ]]; then
+		echo "The backendBucket you specified doesn't reside in the defaultRegion. Change one or the other, then try again."
+		echo "$( echo $EXISTS | jq '.LocationConstraint' ) vs. $AWS_DEFAULT_REGION"
+		exit 1
+	fi
+fi
+
 echo "[*] Preparing to deploy."
 echo "[*] Generating Terraform configurations"
 

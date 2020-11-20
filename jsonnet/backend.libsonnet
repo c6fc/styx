@@ -6,7 +6,7 @@ local backend(settings) = {
 				key: "c6fc.io/styx/terraform.tfstate",
 				profile: settings.awsProfile,
 
-				region: "us-west-2"
+				region: settings.defaultRegion
 			}
 		},
 	}
