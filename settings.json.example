@@ -1,0 +1,13 @@
+{
+	"backendBucket": "backend-terraform-<random>",
+	"defaultRegion": "us-west-2",
+
+	"wildcard_acm_cert_arn": "",
+	"route53Zone": "Z1234EXAMPLE",
+	"root_fqdn": "styx.yourdomain.dom",
+
+	"awsProfile": "default",
+	"adminEmail": "you@youremail.dom",
+	"adminIamName": "you",
+	"debug_lambda": true,
+}

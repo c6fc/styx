@@ -1,0 +1,221 @@
+<div class="clearfix"></div>
+
+    <div class="content-wrapper">
+        <div class="container-fluid">
+
+            <!--Start Dashboard Content-->
+            <div class="text-center" ng-show="(!accounts_loaded)">
+                <img height="50px" width="50px" src="assets/images/loading.gif">
+            </div>
+            <div class="card bg-transparent shadow-none mt-3 border border-secondary-light" ng-show="(accounts_loaded)">
+                <div class="card-header bg-transparent text-white border-secondary-light">
+                    Account Management
+                    <div class="card-action">
+                        <button ng-click="createCustomer()" class="btn btn-info btn-sm">
+                            <i class="icon-plus text-white" style="margin-right: 10px;"></i>New Customer
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body text-white">
+                    <div class="row row-group m-0">
+                        <div class="col-12 col-lg-6 border-secondary-light">
+                            <div class="card-body" ng-hide="customer">
+                                Create a new customer, or select a customer to the right to get started.
+                            </div>
+                            <div class="card-body" ng-show="customer">
+                                <h3 class="text-white">
+                                    {{ customer.customerName }}
+                                
+                                    <div class="card-action">
+                                        <button type="button" ng-click="editCustomerName()" class="btn btn-sm btn-outline-info waves-effect waves-light m-1">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+                                        <button type="button" ng-click="deleteCustomer()" class="btn btn-sm btn-outline-danger waves-effect waves-light m-1">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                        <button class="btn btn-sm" ng-class="(customer.isGlobal == 'TRUE') ? 'btn-warning' : 'btn-outline-secondary'" type="button" ng-click="toggleGlobal()">
+                                            <i class="fa fa-eye"></i>
+                                            {{ (customer.isGlobal == 'TRUE') ? 'global' : 'RBAC' }}
+                                        </button>
+                                    </div>
+                                </h3>
+                                <table class="table table-dark">
+                                    <tbody>
+                                        <tr ng-repeat="(sid, subaccount) in customer.accounts | orderBy: 'name'" class="p-0">
+                                            <td class="p-1">
+                                                <div class="row">
+                                                    <div class="col-10">
+                                                        <small>
+                                                            <button type="button" class="btn btn-sm btn-block waves-effect waves-light m-1" ng-class="(subAccount.name == subaccount.name) ? 'btn-success' : 'btn-outline-success'" style="text-transform: none;" ng-click="showSubAccount(subaccount)">
+                                                                {{ subaccount.name }}
+                                                            </button>
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-2">
+                                                        <button type="button" class="btn btn-sm btn-outline-danger btn-block waves-effect waves-light m-1"   ng-click="deleteSubAccount(subaccount.name)">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center p-0 pt-3"><small>{{ data.accounts.length }}</small></td>
+                                        </tr>
+                                        <tr class="p-0">
+                                            <td class="p-1">
+                                                <small>
+                                                    <button type="button" class="btn btn-sm btn-info btn-block waves-effect waves-light m-1" ng-click="createSubAccount()">
+                                                        <i class="icon-plus text-white mr-2"></i>
+                                                        Add SubAccount
+                                                    </button>
+                                                </small>
+                                            </td>
+                                            <td class="text-center p-0 pt-3"><small>{{ data.accounts.length }}</small></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <hr>
+                                <div ng-show="subAccount">
+                                    <form>
+                                        <div class="form-group">
+                                            <label class="text-white">Name</label>
+                                            <input type="text" class="form-control" ng-model="subAccount.name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="text-white">Account Number</label>
+                                            <input type="text" class="form-control" ng-model="subAccount.number">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="text-white">Role Name</label>
+                                            <input type="text" class="form-control" ng-model="subAccount.roleName">
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2 border-secondary-light">
+                            &nbsp;
+                        </div>
+                        <div class="col-12 col-lg-4 border-secondary-light">
+                            <div class="card-body p-0">
+                                <table class="table table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Accounts</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="(id, data) in accounts | orderBy: 'customerName'" class="p-0">
+                                            <td class="p-1">
+                                                <small>
+                                                    <button type="button" class="btn btn-outline-success btn-sm btn-block waves-effect waves-light m-1" ng-class="(customer.customerName == data.customerName) ? 'btn-success' : 'btn-outline-success'" style="text-transform: none;" ng-click="showAccount(data)">
+                                                        {{ data.customerName }}
+                                                    </button>
+                                                </small>
+                                            </td>
+                                            <td class="text-center p-0 pt-3"><small>{{ data.accounts.length }}</small></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div><!--End Row-->
+                    <div class="row row-group m-0">
+                        <div class="col-11 border-secondary-light">
+                            <div class="card-body text-right pb-0">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary px-5" ng-click="saveCustomers()">
+                                        <i class="icon-lock mr-2"></i>
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!--End Card-->
+
+            <div class="card bg-transparent shadow-none mt-3 border border-secondary-light" ng-show="(accounts_loaded)">
+                <div class="card-header bg-transparent text-white border-secondary-light">
+                    Role Trust Policy
+                </div>
+                <div class="card-body">
+                    <pre><span class="text-white">{{ trustPolicy() }}</span></pre>
+                </div>
+            </div><!--End Card-->
+      
+            <!--End Dashboard Content-->
+
+        </div>
+    <!-- End container-fluid-->
+    
+    </div><!--End content-wrapper-->
+    
+    <!--Start Back To Top Button-->
+    <a href="javaScript:void();" class="back-to-top"><i class="fa fa-angle-double-up"></i> </a>
+    <!--End Back To Top Button-->
+
+    <!--Start footer-->
+    <footer class="footer bg-transparent border-secondary-light">
+        <div class="container">
+            <div class="text-center text-white">
+            </div>
+        </div>
+    </footer>
+    <!--End footer-->
+
+</div><!--End wrapper-->
+
+<div id="editCustomerNameModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content bg-dark border border-white" style="width: 800px;">
+            <div class="modal-header">
+                <h5 class="modal-title text-white">Edit Customer Name</h5>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12 text-white">
+                            Renaming a customer will immediately save all uncommitted changes.
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="basic-input" class="col-sm-2 col-form-label text-white">New Name</label>
+                        <div class="col-10 text-white">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" ng-model="newCustomerName"  ng-enter="commitCustomerName()">
+                                <div class="input-group-append">
+                                    <button class="btn btn-success" type="button" ng-click="commitCustomerName()">
+                                        <i class="fa fa-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="saveModal" class="modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content bg-dark border border-white" style="width: 800px;">
+            <div class="modal-header">
+                <h5 class="modal-title text-white">Saving Customer Entries</h5>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12 text-white text-center">
+                            <h3 class="text-white">
+                                Save in progress
+                            </h3>
+                            <img height="50px" width="50px" src="assets/images/loading.gif">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

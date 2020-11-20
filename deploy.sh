@@ -1,0 +1,65 @@
+#! /bin/bash
+
+if [[ $1 == "" ]]; then
+	TERBIN=terraform
+else
+	TERBIN=$1
+fi
+
+ERR=0;
+if [[ ! -f $(which jsonnet) ]]; then
+	ERR=1;
+	echo "Error: Must have 'jsonnet' command installed.";
+fi
+
+if [[ ! -f $(which jq) ]]; then
+	ERR=1;
+	echo "Error: Must have 'jq' command installed.";
+fi
+
+if [[ ! -f $(which aws) ]]; then
+	ERR=1;
+	echo "Error: Must have AWSCLI installed.";
+fi
+
+if [[ ! -f $(which $TERBIN) ]]; then
+	ERR=1;
+	echo "Error: Must have Terraform installed.";
+fi
+
+if [[ `$TERBIN -v | grep v0.13 | wc -l` -ne 1 ]]; then
+	ERR=1;
+	echo "Error: This was build for Terraform v0.13."
+fi
+
+if [[ ! -f $(which snap) ]]; then
+	if [[ $(snap list | grep $TERBIN | wc -l) ]]; then
+		ERR=1;
+		echo "Error: Terraform cannot be installed via snap. Download the v.13 binary manually and place it in your path."
+	fi
+
+	if [[ $(snap list | grep jsonnet | wc -l) ]]; then
+		ERR=1;
+		echo "Error: jsonnet cannot be installed via snap. Download the binary manually and place it in your path."
+	fi
+
+	if [[ $(snap list | grep jq | wc -l) ]]; then
+		ERR=1;
+		echo "Error: jq cannot be installed via snap. Install via apt or download in manually and place it in your path."
+	fi
+fi
+
+if [[ "$ERR" -eq "1" ]]; then
+	echo "Fix the above errors, then try again."
+	exit 1
+fi
+
+echo "[*] Preparing to deploy."
+echo "[*] Generating Terraform configurations"
+
+rm *.tf.json
+# Generate terraform configs
+jsonnet -m . terraform.jsonnet
+
+[[ ! -d .terraform ]] && $TERBIN init
+$TERBIN apply --auto-approve

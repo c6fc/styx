@@ -1,0 +1,155 @@
+<div class="clearfix"></div>
+	
+  <div class="content-wrapper">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="card bg-transparent shadow-none border border-secondary-light">
+            <div class="card-header bg-transparent text-white border-secondary-light">
+              Active 
+            </div>
+            <div class="card-body">
+              <img height="50px" width="50px" src="assets/images/loading.gif" ng-show="(!accounts_loaded)">
+
+              <div ng-hide="accounts | count">
+                div class="card mb-2 border border-white shadow-none">
+                  <div class="card-header">
+                      <button class="btn btn-link text-dark shadow-none">
+                        No customers configured.
+                      </button>
+                  </div>
+
+                  <div>
+                    <div class="card-body bg-dark text-white text-center">
+                      You have no customers configured. Add one under the Administration panel.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="accordion{{ $index }}" ng-repeat="(id, customer) in accounts | orderBy: 'customerName'">
+                <div class="card mb-2 border border-white shadow-none">
+                  <div class="card-header">
+                      <button class="btn btn-link text-dark shadow-none" data-toggle="collapse" data-target="#collapse{{ $index }}" aria-expanded="true" aria-controls="collapse{{ $index }}">
+                        {{ customer.customerName }}
+                      </button>
+                  </div>
+
+                  <div id="collapse{{ $index }}" class="collapse show" data-parent="#accordion{{ $index }}">
+                    <div class="card-body bg-dark text-white">
+                      <div class="table-responsive">
+                        <table class="table table-dark">
+                          <thead>
+                            <tr>
+                              <th>Account Name</th>
+                              <th>Account ID</th>
+                              <th>Role Name</th>
+                              <th>Switch Role</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr ng-repeat="(x, account) in customer.accounts | orderBy: 'name'">
+                              <td><small>{{ account.name }}</small></td>
+                              <td><small>{{ account.number }}</small></td>
+                              <td><small>{{ account.roleName }}<small></td>
+                              <td>
+                                <a href="https://signin.aws.amazon.com/switchrole?roleName={{ account.roleName }}&account={{ account.number }}&displayName={{ customer.customerName }} {{ account.name }}" target="_blank" class="m-4">
+                                  <i class="icon-rocket"></i>
+                                </a>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End container-fluid-->
+    
+  </div><!--End content-wrapper-->
+   <!--Start Back To Top Button-->
+  <a href="javaScript:void();" class="back-to-top"><i class="fa fa-angle-double-up"></i> </a>
+    <!--End Back To Top Button-->
+	
+	<!--Start footer-->
+	<footer class="footer bg-transparent border-secondary-light">
+      <div class="container">
+        <div class="text-center text-white">
+        </div>
+      </div>
+    </footer>
+	<!--End footer-->
+   
+  </div><!--End wrapper-->
+
+  <div id="messageModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Message from Styx</h5>
+          <button type="button" class="close" data-dismiss="orderErrorModal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div ng-repeat="message in modalMessages.error" class="alert alert-outline-danger" role="alert">
+            <div class="alert-icon">
+              <i class="icon-close"></i>
+            </div>
+            <div class="alert-message">
+              <span>
+                <strong>
+                  Error:
+                </strong>
+                {{ message }}
+              </span>
+            </div>
+          </div>
+          <div ng-repeat="message in modalMessages.warn" class="alert alert-outline-warning" role="alert">
+            <div class="warning-icon">
+              <i class="icon-close"></i>
+            </div>
+            <div class="alert-message">
+              <span>
+                <strong>
+                  Warning:
+                </strong>
+                {{ message }}
+              </span>
+            </div>
+          </div>
+          <div ng-repeat="message in modalMessages.success" class="alert alert-outline-success" role="alert">
+            <div class="alert-icon">
+              <i class="icon-check"></i>
+            </div>
+            <div class="alert-message">
+              <span>
+                <strong>
+                  Success:
+                </strong>
+                {{ message }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="fa fa-times"></i>
+            Understood
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Index js -->
+  <!-- script src="assets/js/index2.js"></script -->
+  
+</body>
+</html>

@@ -1,0 +1,8 @@
+*.auto.tfvars
+**.terraform
+*.tfstate
+*.tfstate*
+*.tf.json
+**/node_modules
+lambda_functions/zip_files/*
+settings.json
