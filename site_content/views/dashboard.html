@@ -9,14 +9,14 @@
               Active 
             </div>
             <div class="card-body">
-              <img height="50px" width="50px" src="assets/images/loading.gif" ng-show="(!accounts_loaded)">
+              <img height="50px" width="50px" style="margin: 20px 0px 20px 40%;" src="assets/images/loading.gif" ng-show="(!accounts_loaded)">
 
-              <div ng-hide="accounts | count">
-                div class="card mb-2 border border-white shadow-none">
+              <div ng-hide="!accounts_loaded || (accounts | count)">
+                <div class="card mb-2 border border-white shadow-none">
                   <div class="card-header">
-                      <button class="btn btn-link text-dark shadow-none">
-                        No customers configured.
-                      </button>
+                    <button class="btn btn-link text-dark shadow-none">
+                      No customers configured.
+                    </button>
                   </div>
 
                   <div>

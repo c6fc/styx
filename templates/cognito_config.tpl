@@ -12,4 +12,5 @@ angular.module('app')
 		}
 	})
 	.constant('APIGATEWAY_URL', "${apigw}")
+	.constant('MASTER_AWS_ACCOUNT_ID', "${awsid}")
 	;

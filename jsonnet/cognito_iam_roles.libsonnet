@@ -86,7 +86,7 @@
 					"resources": [
 						"*"
 					]
-				},{
+				}, {
 					"sid": "ddb",
 					"actions": [
 						"dynamodb:Scan"
@@ -94,13 +94,48 @@
 					"resources": [
 						"${aws_dynamodb_table.styx.arn}"
 					]
-				},{
+				}, {
 					"sid": "apigateway",
 					"actions": [
 						"execute-api:Invoke"
 					],
 					"resources": [
 						"${aws_api_gateway_deployment.styx.execution_arn}/*/api/*",
+					]
+				}, {
+					"sid": "cognitoAdmin",
+					"actions": [
+						"cognito-idp:AdminAddUserToGroup",
+						"cognito-idp:AdminCreateUser",
+						"cognito-idp:AdminDeleteUser",
+						"cognito-idp:AdminDisableUser",
+						"cognito-idp:AdminEnableUser",
+						"cognito-idp:AdminListUserAuthEvents",
+						"cognito-idp:AdminRemoveUserFromGroup",
+						"cognito-idp:AdminResetUserPassword",
+						"cognito-idp:AdminUpdateUserAttributes",
+						"cognito-idp:ListUsers",
+						"cognito-idp:ListUsersInGroup"
+					],
+					"resources": [
+						"${aws_cognito_user_pool.styx.arn}"
+					]
+				}, {
+					"sid": "cognitoIdentities",
+					"actions": [
+						"cognito-idp:ListIdentities",
+						"cognito-idp:DescribeIdentity",
+					],
+					"resources": [
+						"${aws_cognito_identity_pool.styx.arn}"
+					]
+				}, {
+					"sid": "listUserTags",
+					"actions": [
+						"iam:ListUserTags"
+					],
+					"resources": [
+						"arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/*"
 					]
 				}]
 			},

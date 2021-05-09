@@ -1,62 +1,58 @@
-'use strict';
-
 const aws = require('aws-sdk');
-var cb = "";
-var origin = "";
 
-function respond(statusCode, headers, body, success) {	
+let cb = '';
+let origin = '';
 
-	var allowed_origins = [
-		"https://" + process.env.BASEPATH,
-		"http://localhost"
-	]
+function respond(statusCode, headers, body, success) {
+  const allowedOrigins = [
+    `https://${process.env.BASEPATH}`,
+    'http://localhost',
+  ];
 
-	if (allowed_origins.indexOf(origin) !== false) {
-		headers['Access-Control-Allow-Origin'] = origin;
-	}
+  let responseHeaders;
 
-	cb(null, {
-		statusCode: statusCode,
-		headers: headers,
-		body: ((typeof body == "string") ? body : JSON.stringify(body))
-	});
+  if (allowedOrigins.indexOf(origin) > -1) {
+    responseHeaders['Access-Control-Allow-Origin'] = origin;
+  }
 
-	if (success == true) {
-		return Promise.resolve(body);
-	} else {
-		return Promise.reject(body);
-	}
+  cb(null, {
+    statusCode,
+    responseHeaders,
+    body: ((typeof body === 'string') ? body : JSON.stringify(body)),
+  });
+
+  if (success) {
+    return Promise.resolve(body);
+  }
+
+  return Promise.reject(body);
 }
 
-exports.main = function(request, context, callback) {
+exports.main = function (request, context, callback) {
+  const ddb = new aws.DynamoDB({ region: 'us-west-2' });
 
-	console.log(request);
+  // eslint-disable-next-line no-console
+  console.log(request);
 
-	cb = callback;
-	origin = request.headers.origin || request.headers.Origin;
+  cb = callback;
+  origin = request.headers.origin || request.headers.Origin;
 
-	var body = request.body;
-	if (request.isBase64Encoded) { 
-		body = new Buffer(req_body, 'base64').toString('utf8');
-	}
+  request.pathParameters.customer = Buffer.from(request.pathParameters.customer, 'base64').toString('utf8');
 
-	request.pathParameters.customer = new Buffer(request.pathParameters.customer, 'base64').toString('utf8');
+  // eslint-disable-next-line no-console
+  console.log(request.pathParameters.customer);
 
-	console.log(request.pathParameters.customer);
-
-	var ddb = new aws.DynamoDB({"region": "us-west-2"});
-
-	return ddb.deleteItem({
-		Key: {
-			customerName: {
-				S: request.pathParameters.customer
-			}
-		},
-		TableName: process.env.TABLE,
-	}).promise()
-	.then((result) => {
-		respond(200, {}, request.pathParameters.customer, true);
-	}, (err) => {
-		respond(500, {}, err, true);
-	});
+  return ddb.deleteItem({
+    Key: {
+      customerName: {
+        S: request.pathParameters.customer,
+      },
+    },
+    TableName: process.env.TABLE,
+  }).promise()
+    .then(() => {
+      respond(200, {}, request.pathParameters.customer, true);
+    }, (err) => {
+      respond(500, {}, err, true);
+    });
 };

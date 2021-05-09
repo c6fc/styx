@@ -88,7 +88,7 @@ local rest_api_map(api, pathParts) = {
 			for method in std.objectFields(object.methods)
 		})
 	}, if (std.objectHas(object, 'children')) then 
-		join_objects([self.foo(api, "${aws_api_gateway_resource.%s-%s.id}" % [path, object.pathPart], thispath, item) for item in object.children])
+		join_objects([self.foo(api, "${" + std.strReplace(std.strReplace(std.strReplace("aws_api_gateway_resource.%s-%s.id" % [path, object.pathPart], "}", ""), "{", ""), "+", "") + "}", thispath, item) for item in object.children])
 	else { }),
 
 	resource: join_objects([self.foo(api, "${aws_api_gateway_rest_api.%s.root_resource_id}" % [api], "root", item) for item in pathParts.root.children]),

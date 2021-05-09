@@ -156,6 +156,13 @@ angular
 	   			return cognito.routeRequireLogin();
 	   		}]
 	   	})
+	   	.when('/users', {
+	   		templateUrl: "views/user-administration.html",
+	   		controller: "uaCtrl",
+	   		resolveRedirectTo: ['cognito', function(cognito) {
+	   			return cognito.routeRequireLogin();
+	   		}]
+	   	})
 	   	.otherwise({
 	   		redirectTo: "/",
 	   	});

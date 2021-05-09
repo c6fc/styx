@@ -11,5 +11,10 @@
   "dependencies": {
     "aws-sdk": "^2.700.0",
     "dynamodb-data-types": "^3.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.19.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1"
   }
 }

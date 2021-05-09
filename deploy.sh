@@ -79,7 +79,7 @@ fi
 echo "[*] Preparing to deploy."
 echo "[*] Generating Terraform configurations"
 
-rm *.tf.json
+rm -f *.tf.json
 # Generate terraform configs
 jsonnet -m . terraform.jsonnet
 

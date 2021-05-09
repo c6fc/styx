@@ -12,4 +12,5 @@ angular.module('app')
 		}
 	})
 	.constant('APIGATEWAY_URL', "api.styx.bradwoodward.io")
+	.constant('MASTER_AWS_ACCOUNT_ID', "712190275767")
 	;

@@ -22,6 +22,16 @@ angular
                return params;
             },
 
+            isAdmin: function() {
+
+               if (localStorage.getItem("authType") == null && !this.cognitoUserSession.hasOwnProperty('idToken')) {
+                  console.log('Init::Auth not initialized');
+                  return false;
+               }
+
+               return this.cognitoUserSession.idToken.payload['cognito:groups'].indexOf('styx-admins') > -1;
+            },
+
             isLoggedOn: function() {
                var self = this;
 
@@ -277,7 +287,6 @@ angular
                      console.log('Init::Logon Failed.');
                      return failure('Logon Failed.');
                   });
-
                });
             }
          };

@@ -15,7 +15,7 @@ function respond(statusCode, headers, body, success) {
 		"http://localhost"
 	]
 
-	if (allowed_origins.indexOf(origin) !== false) {
+	if (allowed_origins.indexOf(origin) > -1) {
 		headers['Access-Control-Allow-Origin'] = origin;
 	}
 
@@ -60,8 +60,8 @@ exports.main = function(event, context, cb) {
 
 			var customerPromises = [];
 			Object.keys(user.Tags).forEach(function(e) {
-				if (/^MS-.*$/.test(e)) {
-					customerPromises.push(query(e.substring(3)));
+				if (/^Styx-.*$/.test(e)) {
+					customerPromises.push(query(e.substring(5)));
 					console.log("Found " + e);
 				} else {
 					console.log(e + " Doesn't match");

@@ -155,7 +155,10 @@ angular
             };
           }
 
-          $scope.$apply();
+          if (!$scope.$$phase) {
+            $scope.$digest();
+          }
+
           return this;
         }
       };
@@ -175,9 +178,7 @@ angular
          });
       });
    }])
-   angular
-.module('app')
-.controller('logonCtrl', ['$scope', '$routeParams', '$location', function($scope, $routeParams, $location) {
+  .controller('logonCtrl', ['$scope', '$routeParams', '$location', function($scope, $routeParams, $location) {
 
       $scope.active = false;
       $scope.name;
@@ -387,7 +388,7 @@ angular
 
       });
    }])
-  .controller('credfileCtrl', ['$scope', '$routeParams', '$timeout', 'APIGATEWAY_URL', function($scope, $routeParams, $timeout, APIGATEWAY_URL) {
+  .controller('credfileCtrl', ['$scope', '$routeParams', '$timeout', 'APIGATEWAY_URL', 'MASTER_AWS_ACCOUNT_ID', function($scope, $routeParams, $timeout, APIGATEWAY_URL, MASTER_AWS_ACCOUNT_ID) {
 
       $scope.modalMessages = {success: [], warning: [], error: []};
       
@@ -429,7 +430,7 @@ angular
                 credFileText += "[styx_" + $scope.cliFriendly(e.customerName.toLowerCase()) + "_" + $scope.cliFriendly(account.name.toLowerCase()) + "]\n";
                 credFileText += "role_arn = arn:aws:iam::" + account.number + ":role/" + account.roleName + "\n";
                 credFileText += "source_profile = styx\n",
-                credFileText += "mfa_serial = arn:aws:iam::" + data.accountId + ":mfa/" + data.msg.callerUsername + "\n\n";
+                credFileText += "mfa_serial = arn:aws:iam::" + MASTER_AWS_ACCOUNT_ID + ":mfa/" + data.msg.callerUsername + "\n\n";
               });
             });
 
@@ -465,7 +466,7 @@ angular
       };
 
       $scope.cliFriendly = function(what) {
-        return what.toString().replace(/[^a-zA-Z0-9]/, "");
+        return what.toString().replace(/[^a-zA-Z0-9]/g, "");
       };
 
       $scope.onReady = function() {
@@ -484,7 +485,7 @@ angular
 
       });
    }])
-  .controller('accountCtrl', ['$scope', '$routeParams', '$timeout', 'APIGATEWAY_URL', function($scope, $routeParams, $timeout, APIGATEWAY_URL) {
+  .controller('accountCtrl', ['$scope', '$routeParams', '$timeout', 'APIGATEWAY_URL', 'MASTER_AWS_ACCOUNT_ID', function($scope, $routeParams, $timeout, APIGATEWAY_URL, MASTER_AWS_ACCOUNT_ID) {
 
       $scope.customer = null;
       $scope.subAccount = null;
@@ -513,7 +514,7 @@ angular
       $scope.createCustomer = function() {
 
         var id = $scope.accounts.push({
-          customerName: "! - New Customer",
+          customerName: "!NewCustomer",
           accounts: [{
             name: "! -New Subaccount",
             number: "",
@@ -555,7 +556,7 @@ angular
       };
 
       $scope.editCustomerName = function() {
-        $scope.newCustomerName = $scope.customer.customerName.toString();
+        $scope.newCustomerName = $scope.cliFriendly($scope.customer.customerName.toString());
         $('#editCustomerNameModal').modal('show');
       };
 
@@ -565,7 +566,7 @@ angular
         var newAccounts = [];
         
         newAccounts.push({
-          customerName: $scope.newCustomerName,
+          customerName: $scope.cliFriendly($scope.newCustomerName),
           accounts: $scope.customer.accounts
         });
 
@@ -575,7 +576,13 @@ angular
         
 
         $('#editCustomerNameModal').modal('hide');
-        $scope.saveCustomers();
+        $scope.saveCustomers().then(() => {
+          $scope.accounts.forEach((e) => {
+            if (e.customerName == $scope.newCustomerName) {
+              $scope.showAccount(e);
+            }
+          });
+        });
       };
 
       $scope.deleteCustomer = function(name = null) {
@@ -594,6 +601,12 @@ angular
         $scope.accounts = newAccounts;
 
         $scope.customersToDelete.push(name);
+
+        if (newAccounts.length > 0) {
+          $scope.showAccount($scope.accounts[0]);
+        } else {
+          $scope.createAccount();
+        }
       }
 
       $scope.deleteSubAccount = function(name = null) {
@@ -630,7 +643,7 @@ angular
           promises.push($scope.$parent.apigateway.deleteCustomer(c));
         });
 
-        Promise.allSettled(promises).then((results) => {
+        return Promise.allSettled(promises).then((results) => {
           $('#saveModal').modal('hide');
           $scope.populateView(true);
 
@@ -640,8 +653,16 @@ angular
       };
 
       $scope.cliFriendly = function(what) {
-        return what.toString().replace(/[^a-zA-Z0-9]/, "");
+        return what.toString().replace(/[^a-zA-Z0-9]/g, "");
       };
+
+      $scope.cliCommand = function() {
+        if (!$scope.customer || !$scope.customer.customerName) {
+          return "";
+        }
+
+        return `aws iam tag-user --tags Key=${$scope.customer.customerName},Value=Admin --user-name`
+      }
 
       $scope.trustPolicy = function() {
         if (!$scope.customer || !$scope.customer.customerName) {
@@ -657,12 +678,12 @@ angular
             Statement: [{
                 Effect: "Allow",
                 Principal: {
-                  AWS: "arn:aws:iam::" + data.account_id + ":root"
+                  AWS: `arn:aws:iam::${MASTER_AWS_ACCOUNT_ID}:root`
                 },
                 Action: "sts:AssumeRole",
                 Condition: {
                     "ForAllValues:StringEquals": {
-                      ["aws:PrincipalTag/Styx-" + $scope.cliFriendly($scope.customer.customerName)]: "Admin",
+                      ["aws:PrincipalTag/Styx-" + $scope.customer.customerName]: "Admin",
                       "aws:PrincipalType": "User"
                   },
                   Bool: {
@@ -673,7 +694,7 @@ angular
               {
                 Effect: "Allow",
                 Principal: {
-                  AWS: "arn:aws:iam::" + data.account_id + ":user/terraform"
+                  AWS: `arn:aws:iam::${MASTER_AWS_ACCOUNT_ID}:user/terraform`
                 },
                 Action: "sts:AssumeRole"
               }
@@ -686,5 +707,219 @@ angular
          $scope.onReady();
       });
    }])
+  .controller('uaCtrl', ['$scope', '$routeParams', '$location', '$timeout', 'userSvc', function($scope, $routeParams, $location, $timeout, userSvc) {
+
+    $scope.users = [];
+
+    $scope.raiseAlert = function(message) {
+      console.log(message);
+    }
+
+    $scope.createUser = function(element, email, nickname, isAdmin) {
+      $(element).removeClass('btn-success').addClass('btn-secondary').innerText = "...";
+      userSvc.createUser(email, nickname, isAdmin).then((data) => {
+        $(element).removeClass('btn-secondary').addClass('btn-success').innerText = "Save";
+        $('#newUserModal').modal('hide');
+
+        return Promise.resolve();
+      }, (e) => {
+        $(element).removeClass('btn-secondary').addClass('btn-success').innerText = "Save";
+        $scope.modalMessages = [e];
+
+        return Promise.resolve();
+      }).then(() => {
+        $scope.loadUsers();
+      });
+    };
+
+    $scope.setUserNickname = function(element, user) {
+      $(element).removeClass('btn-success').addClass('btn-secondary').innerText = "...";
+      userSvc.setUserNickname(user).then((data) => {
+        $(element).removeClass('btn-secondary').addClass('btn-success').innerText = "Save";
+        $('#newUserModal').modal('hide');
+
+        return Promise.resolve();
+      }, (e) => {
+        $(element).removeClass('btn-secondary').addClass('btn-success').innerText = "Save";
+        $scope.modalMessages = [e];
+
+        return Promise.resolve();
+      }).then(() => {
+        $scope.loadUsers();
+        if (!$scope.modalMessages) {
+          $('#changeUserModal').modal('hide');
+        }
+      });
+    };
+
+    $scope.getAuthEvents = function(user) {
+      userSvc.getUserAuthEvents(user.Username).then((data) => {
+        user.authEvents = data.AuthEvents;
+
+        if (!$scope.$$phase) {
+          $scope.$digest();
+        }        
+      });
+    };
+
+    $scope.promoteUser = function (element, user) {
+      $(element).removeClass('btn-outline-success').addClass('btn-outline-secondary');
+
+      userSvc.makeUserAdmin(user).then((data) => {
+        $(element).removeClass('btn-outline-secondary').addClass('btn-outline-success');
+
+        return Promise.resolve();
+      }, (e) => {
+        $scope.raiseAlert(e);
+
+        return Promise.resolve();
+      }).then(() => {
+        $scope.loadUsers();
+      });
+    };
+
+    $scope.demoteUser = function (element, user) {
+      $(element).removeClass('btn-outline-warning').addClass('btn-outline-secondary');
+
+      userSvc.makeUserLimited(user).then((data) => {
+        $(element).removeClass('btn-outline-secondary').addClass('btn-outline-warning');
+
+        return Promise.resolve();
+      }, (e) => {
+        $scope.raiseAlert(e);
+
+        return Promise.resolve();
+      }).then(() => {
+        $scope.loadUsers();
+      });
+    };
+
+    $scope.resetUserPassword = function (element, user) {
+      $(element).removeClass('btn-outline-secondary').addClass('btn-secondary');
+
+      userSvc.resetUserPassword(user).then((data) => {
+        $(element).removeClass('btn-secondary').addClass('btn-outline-secondary');
+
+        return Promise.resolve();
+      }, (e) => {
+        $scope.raiseAlert(e);
+
+        return Promise.resolve();
+      }).then(() => {
+        $scope.loadUsers();
+      });
+    };
+
+    $scope.forceResetUserPassword = function (element, user) {
+      $(element).removeClass('btn-success').addClass('btn-secondary').innerText = "...";
+      userSvc.forceResetUser(user.email).then((data) => {
+        $(element).removeClass('btn-secondary').addClass('btn-success').innerText = "Save";
+        $('#newUserModal').modal('hide');
+
+        return Promise.resolve();
+      }, (e) => {
+        $(element).removeClass('btn-secondary').addClass('btn-success').innerText = "Save";
+        $scope.modalMessages = [e];
+
+        return Promise.resolve();
+      }).then(() => {
+        $scope.loadUsers();
+      });
+    };
+
+    $scope.deleteUser = function (element, user) {
+      $(element).removeClass('btn-outline-primary').addClass('btn-outline-secondary');
+
+      userSvc.deleteUser(user).then((data) => {
+        $(element).removeClass('btn-outline-secondary').addClass('btn-outline-primary');
+
+        return Promise.resolve();
+      }, (e) => {
+        $scope.raiseAlert(e);
+
+        return Promise.resolve();
+      }).then(() => {
+        $scope.loadUsers();
+      });
+    };
+
+    $scope.disableUser = function (element, user) {
+      $(element).removeClass('btn-outline-secondary').addClass('btn-secondary');
+
+      userSvc.disableUser(user).then((data) => {
+        $(element).removeClass('btn-secondary').addClass('btn-outline-secondary');
+
+        return Promise.resolve();
+      }, (e) => {
+        $scope.raiseAlert(e);
+
+        return Promise.resolve();
+      }).then(() => {
+        $scope.loadUsers();
+      });
+    };
+
+    $scope.enableUser = function (element, user) {
+      $(element).removeClass('btn-outline-primary').addClass('btn-outline-secondary');
+
+      userSvc.enableUser(user).then((data) => {
+        $(element).removeClass('btn-outline-secondary').addClass('btn-outline-primary');
+
+        return Promise.resolve();
+      }, (e) => {
+        $scope.raiseAlert(e);
+
+        return Promise.resolve();
+      }).then(() => {
+        $scope.loadUsers();
+      });
+    };
+
+    $scope.loadUsers = function() {
+      userSvc.listUsers().then((data) => {
+        $scope.users = userSvc.users;
+
+        let tagPromises = [];
+        $scope.users.forEach((user) => {
+          tagPromises.push(userSvc.listUserTags(user));
+        });
+
+        return Promise.all(tagPromises);
+
+      }).then(() => {
+
+        if (!$scope.$$phase) {
+          $scope.$digest();
+        }
+
+        $('.arrow').hide();
+        $('.tooltip-inner').hide();
+        $timeout(function() {
+          $('[data-toggle="tooltip"]').tooltip();
+        });
+      });
+    }
+
+    $scope.newUserEmail = "";
+    $scope.newUserIsAdmin = false;
+    $scope.openNewUserModal = function() {
+      $('#newUserModal').modal('show');
+    };
+
+    $scope.activeUser = {};
+    $scope.openChangeUserModal = function(user) {
+      $scope.activeUser = user;
+      $('#changeUserModal').modal('show');
+    };
+    
+    $scope.onReady = function() {
+      $scope.$parent.startApp();
+      $scope.loadUsers();
+    };
+
+    $scope.$on('$routeChangeSuccess', function() {
+      $scope.onReady();
+    });
+  }])
   ;
 
