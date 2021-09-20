@@ -1,10 +1,12 @@
 # Styx - Easy, en-masse assumerole management.
 
-Styx is an entirely serverless assumerole management platform. It's great for MSSPs, Consuluting Firms, and AWS Power Users.
+Styx is an entirely serverless assumerole management platform. It's great for MSSPs, Consulting Firms, and AWS Power Users.
+
+![Image](http://c6fc.io/styx/switchrole.png)
 
 ## Why use it?
 
-When you have lots of accounts, especially of those accounts are spread across many organizations, it can be a pain to track those account numbers and roles. AWS SSO is great for some use-cases, but sometimes good ol' AssumeRole is the way to go. With Styx you can organize and easily access your roles, limit cross-account access based on IAM user tags, produce consistent and reusable role trust policies, and rapidly access them from anywhere.
+When you have lots of accounts, especially of those accounts are spread across many organizations, it can be a pain to track those account numbers and roles. AWS SSO is great for some use-cases, but sometimes good ol' AssumeRole is the way to go. With Styx you can organize and easily access your roles, limit cross-account access based on IAM user tags, produce consistent and reusable role trust policies, rapidly access them from anywhere, and switch between them effortlessly.
 
 ## Features
 
@@ -12,23 +14,35 @@ When you have lots of accounts, especially of those accounts are spread across m
 
 One config file, one command to run. That's about it.
 
-### 2. Multi-user with Tag-based access control.
+### 2. Simple in-app multi-account management.
+
+Group accounts by Organizational Unit, Customer, Release Stage, or any other strategy as you see fit.
+
+![Image](http://c6fc.io/styx/accountmanagement.png)
+
+### 3. Multi-user with Tag-based access control.
 
 Control access to cross-account roles through granular tag-based authorizations.
 
-### 3. Trust policy generator.
+![Image](http://c6fc.io/styx/multi-user.png)
 
-Get a perfect cross-account, granular permission, reusable role trust policy in one click.
+### 4. Trust policy generator.
 
-### 4. AWS credential file generator.
+Get the perfect cross-account, granular-scope, and reusable role trust policy in one click.
+
+![Image](http://c6fc.io/styx/trustpolicy.png)
+
+### 5. AWS credential file generator.
 
 No more manual edits to `~/.aws/credentials.` - Styx lets you generate AssumeRole entries for every role you're authorized to access.
 
-### 5. No secrets
+![Image](http://c6fc.io/styx/credfile.png)
 
-Styx facilitates cross-account access without requiring any access to security-impacting secrets. 
+### 6. No secrets
 
-### 6. No broker - cloud-native security controls only!
+Styx facilitates cross-account access without requiring any access to security-impacting secrets.
+
+### 7. No broker; cloud-native security controls only!
 
 Brokering authorizations is always a bad idea. Instead, Styx merely facilitates authentication and authorization through cloud-native components.
 

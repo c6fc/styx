@@ -661,7 +661,7 @@ angular
           return "";
         }
 
-        return `aws iam tag-user --tags Key=${$scope.customer.customerName},Value=Admin --user-name`
+        return `aws iam tag-user --tags Key=Styx-${$scope.customer.customerName},Value=Admin --user-name <username>`
       }
 
       $scope.trustPolicy = function() {
@@ -670,7 +670,32 @@ angular
         }
 
         if ($scope.customer.isGlobal == "TRUE") {
-          return "";
+          return JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [{
+                Effect: "Allow",
+                Principal: {
+                  AWS: `arn:aws:iam::${MASTER_AWS_ACCOUNT_ID}:root`
+                },
+                Action: "sts:AssumeRole",
+                Condition: {
+                    "ForAllValues:StringEquals": {
+                      "aws:PrincipalType": "User"
+                  },
+                  Bool: {
+                    "aws:MultiFactorAuthPresent": "true"
+                  }
+                }
+              },
+              {
+                Effect: "Allow",
+                Principal: {
+                  AWS: `arn:aws:iam::${MASTER_AWS_ACCOUNT_ID}:user/terraform`
+                },
+                Action: "sts:AssumeRole"
+              }
+            ]
+          }, null, 3);
         }
 
         return JSON.stringify({
